@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ku">
+<head>
+  <meta charset="UTF-8">
+  <title>پانێڵی ئەدمین</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #f0f2f5;
+      color: #333;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      background: linear-gradient(to right, #0077ff, #00c6ff);
+      color: white;
+      padding: 1rem;
+      border-radius: 10px;
+    }
+    section {
+      margin-bottom: 2rem;
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    input, textarea, select, button {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #0077ff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <h1>پانێڵی ئەدمین</h1>
+
+  <!-- زیادکردنی بەرهەم -->
+  <section>
+    <h2>زیادکردنی بەرهەم</h2>
+    <label>ناوی بەرهەم</label>
+    <input type="text" id="productName">
+    <label>وەسف</label>
+    <textarea id="productDesc"></textarea>
+    <label>نرخی بەرهەم (IQD)</label>
+    <input type="number" id="productPrice">
+    <label>لینکی وێنە</label>
+    <input type="text" id="productImage">
+    <button onclick="addProduct()">زیادکردن</button>
+  </section>
+
+  <!-- زیادکردنی کۆدی بەرهەم -->
+  <section>
+    <h2>زیادکردنی کۆدی بەرهەم</h2>
+    <label>ناوی بەرهەم</label>
+    <input type="text" id="codeProductName">
+    <label>لیستی کۆد (هەریەک لە سەر هێڵێک)</label>
+    <textarea id="productCodes"></textarea>
+    <button onclick="addCodes()">زیادکردن</button>
+  </section>
+
+  <!-- زیادکردنی کۆدی باڵانس -->
+  <section>
+    <h2>زیادکردنی کۆدی باڵانس</h2>
+    <label>کۆد</label>
+    <input type="text" id="balanceCode">
+    <label>نرخی کۆد (IQD)</label>
+    <input type="number" id="balanceAmount">
+    <button onclick="addBalanceCode()">زیادکردن</button>
+  </section>
+
+  <!-- سڕینەوەی بەرهەم بە دیاریکردن -->
+  <section>
+    <h2>سڕینەوەی یەک بەرهەم</h2>
+    <label>ناوی بەرهەم</label>
+    <input type="text" id="deleteProductName">
+    <button onclick="deleteProduct()">سڕینەوە</button>
+  </section>
+
+  <!-- ڕەشکردنەوەی هەموو بەرهەمەکان -->
+  <section>
+    <h2>ڕەشکردنەوەی هەموو بەرهەمەکان</h2>
+    <button onclick="clearProducts()">ڕەشکردنەوە</button>
+  </section>
+
+  <!-- بینینی ئەکاونتەکان -->
+  <section>
+    <h2>بینینی ئەکاونتە تۆمارکراوەکان</h2>
+    <div id="accountList">
+      <p>ئەکاونت نەدۆزرایەوە...</p>
+    </div>
+  </section>
+
+  <script>
+    function addProduct() {
+      const name = document.getElementById("productName").value;
+      const desc = document.getElementById("productDesc").value;
+      const price = parseInt(document.getElementById("productPrice").value);
+      const image = document.getElementById("productImage").value;
+      if (!name || !desc || !price || !image) return alert("تکایە هەموو خانەکان پڕبکەوە");
+
+      const products = JSON.parse(localStorage.getItem("products") || "[]");
+      const found = products.find(p => p.name === name);
+      if (found) return alert("ئەم بەرهەمە پێشتر تۆمارکراوە");
+
+      products.push({ name, desc, price, image });
+      localStorage.setItem("products", JSON.stringify(products));
+      alert("زیادکرا");
+    }
+
+    function addCodes() {
+      const name = document.getElementById("codeProductName").value;
+      const codes = document.getElementById("productCodes").value.trim().split("\n");
+      if (!name || codes.length === 0) return alert("تکایە خانەکان پڕبکەوە");
+
+      const allCodes = JSON.parse(localStorage.getItem("codes") || "{}");
+      if (!allCodes[name]) allCodes[name] = [];
+      allCodes[name] = allCodes[name].concat(codes);
+      localStorage.setItem("codes", JSON.stringify(allCodes));
+      alert("کۆدەکان زیادکران");
+    }
+
+    function addBalanceCode() {
+      const code = document.getElementById("balanceCode").value;
+      const amount = parseInt(document.getElementById("balanceAmount").value);
+      if (!code || !amount) return alert("تکایە خانەکان پڕبکەوە");
+
+      const balanceCodes = JSON.parse(localStorage.getItem("balanceCodes") || "{}");
+      balanceCodes[code] = amount;
+      localStorage.setItem("balanceCodes", JSON.stringify(balanceCodes));
+      alert("کۆدی باڵانس زیادکرا");
+    }
+
+    function deleteProduct() {
+      const name = document.getElementById("deleteProductName").value;
+      if (!name) return alert("تکایە ناوی بەرهەم بنووسە");
+
+      let products = JSON.parse(localStorage.getItem("products") || "[]");
+      const updated = products.filter(p => p.name !== name);
+      if (updated.length === products.length) {
+        alert("بەرهەمی دیاری کراو نەدۆزرایەوە");
+        return;
+      }
+
+      localStorage.setItem("products", JSON.stringify(updated));
+
+      const codes = JSON.parse(localStorage.getItem("codes") || "{}");
+      delete codes[name];
+      localStorage.setItem("codes", JSON.stringify(codes));
+
+      alert("بەرهەم سڕایەوە");
+    }
+
+    function clearProducts() {
+      if (confirm("دڵنیایت دەتەوێت هەموو بەرهەمەکان ڕەش بکەیتەوە؟")) {
+        localStorage.removeItem("products");
+        localStorage.removeItem("codes");
+        alert("هەموو بەرهەمەکان ڕەشکرانەوە");
+      }
+    }
+
+    // بینینی ئەکاونتەکان
+    const accounts = JSON.parse(localStorage.getItem("accounts") || "[]");
+    const accountDiv = document.getElementById("accountList");
+
+    if (accounts.length > 0) {
+      let html = "<table style='width:100%;margin-top:1rem;border-collapse:collapse'><tr><th style='text-align:left;border-bottom:1px solid #ccc;padding:8px'>#</th><th style='text-align:left;border-bottom:1px solid #ccc;padding:8px'>ئیمەیڵ</th><th style='text-align:left;border-bottom:1px solid #ccc;padding:8px'>وشەی نهێنی</th></tr>";
+      accounts.forEach((acc, i) => {
+        html += `<tr><td style='padding:8px'>${i + 1}</td><td style='padding:8px'>${acc.email}</td><td style='padding:8px'>${acc.password}</td></tr>`;
+      });
+      html += "</table>";
+      accountDiv.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

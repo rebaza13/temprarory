@@ -1,0 +1,105 @@
+<!-- login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <style>
+    body {
+      background: linear-gradient(to right, #ffffff, #e6f2ff);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    button {
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .flags {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    .flags img {
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 id="title">Login</h2>
+    <label id="emailLabel" for="email">Email</label>
+    <input type="email" id="email" placeholder="example@example.com">
+    <label id="passwordLabel" for="password">Password</label>
+    <input type="password" id="password" placeholder="••••••••">
+    <div id="error" style="color:red;"></div>
+    <button onclick="submitForm()" id="btn">Login</button>
+
+    <div class="flags">
+      <img src="https://flagcdn.com/w40/gb.png" onclick="setLang('en')">
+      <img src="https://flagcdn.com/w40/iq.png" onclick="setLang('ku')">
+      <img src="https://flagcdn.com/w40/sa.png" onclick="setLang('ar')">
+    </div>
+  </div>
+
+  <script>
+    function submitForm() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const error = document.getElementById('error');
+
+      if (!email || !password) {
+        error.textContent = langObj[currentLang].error;
+      } else {
+        const accounts = JSON.parse(localStorage.getItem("accounts") || "[]");
+        const account = accounts.find(acc => acc.email === email && acc.password === password);
+        if (account) {
+          window.location.href = "home.html";
+        } else {
+          error.textContent = langObj[currentLang].invalidCredentials;
+        }
+      }
+    }
+
+    const langObj = {
+      en: { title: "Login", email: "Email", password: "Password", button: "Login", error: "Please fill in all fields", invalidCredentials: "Invalid email or password" },
+      ar: { title: "تسجيل الدخول", email: "البريد الإلكتروني", password: "كلمة المرور", button: "تسجيل الدخول", error: "يرجى ملء جميع الحقول", invalidCredentials: "البريد الإلكتروني أو كلمة المرور غير صحيحة" },
+      ku: { title: "چوونەژوورەوە", email: "ئیمەیڵ", password: "پاسۆرد", button: "چوونەژوورەوە", error: "تکایە هەموو خانەکان پڕبکەوە", invalidCredentials: "ئیمەیڵ یان پاسۆرد هەڵەیە" }
+    };
+
+    let currentLang = 'en';
+    function setLang(lang) {
+      currentLang = lang;
+      document.getElementById('title').textContent = langObj[lang].title;
+      document.getElementById('emailLabel').textContent = langObj[lang].email;
+      document.getElementById('passwordLabel').textContent = langObj[lang].password;
+      document.getElementById('btn').textContent = langObj[lang].button;
+    }
+  </script>
+</body>
+</html>

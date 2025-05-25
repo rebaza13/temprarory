@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ku">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بازاڕی بەرهەمەکان</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Noto Sans Arabic', sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #f5f6fa;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+    header {
+      background: linear-gradient(to right, #0077ff, #00c6ff);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+    .balance {
+      margin: 1rem;
+      font-size: 1.2rem;
+    }
+    .code-input {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem;
+    }
+    input, button {
+      padding: 0.6rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #0077ff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .products {
+      padding: 1rem;
+    }
+    .product {
+      background: white;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .product img {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+    }
+    .product-info {
+      flex: 1;
+    }
+    .dark-mode {
+      background-color: #181818;
+      color: #f5f6fa;
+    }
+    .dark-mode .product {
+      background: #2c2c2c;
+    }
+    .transactions {
+      background: white;
+      margin: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .transactions .entry {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+    }
+    .transactions .entry:last-child {
+      border-bottom: none;
+    }
+    .confirm-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: visibility 0.3s, opacity 0.3s;
+    }
+    .confirm-modal.active {
+      visibility: visible;
+      opacity: 1;
+    }
+    .confirm-modal .modal-content {
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: center;
+      width: 300px;
+    }
+    .confirm-modal button {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>بازاڕی بەرهەمەکان</header>
+  <div class="balance">باڵانس: <span id="balance">0</span> IQD</div>
+  <div class="code-input">
+    <input type="text" id="codeInput" placeholder="کۆدی باڵانس داخل بکە">
+    <button onclick="redeemCode()">زیادکردن</button>
+  </div>
+  <div class="products" id="productList"></div>
+  <div class="transactions" id="transactions">
+    <h2 style="text-align:center; margin: 1rem 0;">مامەڵەکان</h2>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="confirm-modal" id="confirmModal">
+    <div class="modal-content">
+      <h3>دڵنیایت لە کڕینی ئەم بەرهەمە؟</h3>
+      <button onclick="confirmPurchase()">دڵنیام</button>
+      <button onclick="cancelPurchase()">نەخێر</button>
+    </div>
+  </div>
+
+  <script>
+    let balance = parseInt(localStorage.getItem("balance") || 0);
+    const balanceCodes = JSON.parse(localStorage.getItem("balanceCodes") || "{}");
+    const products = JSON.parse(localStorage.getItem("products") || "[]");
+    const productCodes = JSON.parse(localStorage.getItem("codes") || "{}");
+    const usedCodes = JSON.parse(localStorage.getItem("usedCodes") || "[]");
+    const transactions = JSON.parse(localStorage.getItem("transactions") || "[]");
+
+    document.getElementById("balance").innerText = balance;
+
+    function saveAll() {
+      localStorage.setItem("balance", balance);
+      localStorage.setItem("usedCodes", JSON.stringify(usedCodes));
+      localStorage.setItem("transactions", JSON.stringify(transactions));
+    }
+
+    function logTransaction(text) {
+      transactions.unshift({ text, time: new Date().toLocaleString() });
+      localStorage.setItem("transactions", JSON.stringify(transactions));
+    }
+
+    function redeemCode() {
+      const code = document.getElementById("codeInput").value;
+      if (balanceCodes[code]) {
+        balance += balanceCodes[code];
+        delete balanceCodes[code];
+        localStorage.setItem("balanceCodes", JSON.stringify(balanceCodes));
+        logTransaction(`زیادکردنی باڵانس بە کۆدی ${code}`);
+        saveAll();
+        alert("باڵانس زیادکرا!");
+        location.reload();
+      } else {
+        alert("کۆدی هەڵە یان بەکارهاتووە!");
+      }
+    }
+
+    function renderProducts() {
+      const list = document.getElementById("productList");
+      list.innerHTML = '';
+      products.forEach((p, i) => {
+        const div = document.createElement("div");
+        div.className = "product";
+        div.innerHTML = `
+          <img src="${p.image}" />
+          <div class="product-info">
+            <h3>${p.name}</h3>
+            <p>${p.desc}</p>
+            <strong>${p.price} IQD</strong>
+          </div>
+          <button onclick="initiatePurchase(${i})">کڕین</button>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function initiatePurchase(index) {
+      const p = products[index];
+      if (!productCodes[p.name] || productCodes[p.name].length === 0) {
+        alert("بەرهەم بەردەست نیە");
+        return;
+      }
+      if (balance < p.price) {
+        alert("باڵانست ناکێشێت");
+        return;
+      }
+
+      // Show confirm modal
+      document.getElementById("confirmModal").classList.add("active");
+      document.getElementById("confirmModal").dataset.productIndex = index;
+    }
+
+    function confirmPurchase() {
+      const index = document.getElementById("confirmModal").dataset.productIndex;
+      const p = products[index];
+      const code = productCodes[p.name].shift();
+      usedCodes.push(code);
+      balance -= p.price;
+      localStorage.setItem("codes", JSON.stringify(productCodes));
+      logTransaction(`کڕینی ${p.name} بە ${p.price} IQD`);
+      saveAll();
+      alert("کۆدی بەرهەمەکەت:");
+      prompt("کۆدی بەرهەم", code);
+      location.reload();
+      document.getElementById("confirmModal").classList.remove("active");
+    }
+
+    function cancelPurchase() {
+      document.getElementById("confirmModal").classList.remove("active");
+    }
+
+    function renderTransactions() {
+      const list = document.getElementById("transactions");
+      transactions.forEach(t => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.innerText = `[${t.time}] ${t.text}`;
+        list.appendChild(div);
+      });
+    }
+
+    window.onload = () => {
+      renderProducts();
+      renderTransactions();
+    }
+  </script>
+</body>
+</html>

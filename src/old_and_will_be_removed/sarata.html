@@ -1,0 +1,102 @@
+<!-- create.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Account</title>
+  <style>
+    body {
+      background: linear-gradient(to right, #ffffff, #e6f2ff);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    button {
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .flags {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    .flags img {
+      width: 30px;
+      height: 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 id="title">Create Account</h2>
+    <label id="emailLabel" for="email">Email</label>
+    <input type="email" id="email" placeholder="example@example.com">
+    <label id="passwordLabel" for="password">Password</label>
+    <input type="password" id="password" placeholder="••••••••">
+    <div id="error" style="color:red;"></div>
+    <button onclick="submitForm()" id="btn">Create Account</button>
+
+    <div class="flags">
+      <img src="https://flagcdn.com/w40/gb.png" onclick="setLang('en')">
+      <img src="https://flagcdn.com/w40/iq.png" onclick="setLang('ku')">
+      <img src="https://flagcdn.com/w40/sa.png" onclick="setLang('ar')">
+    </div>
+  </div>
+
+  <script>
+    function submitForm() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const error = document.getElementById('error');
+
+      if (!email || !password) {
+        error.textContent = langObj[currentLang].error;
+      } else {
+        const accounts = JSON.parse(localStorage.getItem("accounts") || "[]");
+        accounts.push({ email, password });
+        localStorage.setItem("accounts", JSON.stringify(accounts));
+        window.location.href = "home.html";
+      }
+    }
+
+    const langObj = {
+      en: { title: "Create Account", email: "Email", password: "Password", button: "Create Account", error: "Please fill in all fields" },
+      ar: { title: "إنشاء حساب", email: "البريد الإلكتروني", password: "كلمة المرور", button: "إنشاء الحساب", error: "يرجى ملء جميع الحقول" },
+      ku: { title: "درووستکردنی ئەکاوەنت", email: "ئیمەیڵ", password: "پاسۆرد", button: "درووستکردن", error: "تکایە هەموو خانەکان پڕبکەوە" }
+    };
+
+    let currentLang = 'en';
+    function setLang(lang) {
+      currentLang = lang;
+      document.getElementById('title').textContent = langObj[lang].title;
+      document.getElementById('emailLabel').textContent = langObj[lang].email;
+      document.getElementById('passwordLabel').textContent = langObj[lang].password;
+      document.getElementById('btn').textContent = langObj[lang].button;
+    }
+  </script>
+</body>
+</html>
