@@ -21,12 +21,20 @@
         </div>
         <button @click="initiatePurchase(i)" class="btn btn-success w-100">کڕین</button>
       </div>
-    </div>
-    <div class="transactions card">
+    </div>    <div class="transactions card">
       <h2 class="card-header">مامەڵەکان</h2>
       <ul class="list-group list-group-flush">
         <li v-for="t in transactions" :key="t.time" class="list-group-item entry">
-          [{{ t.time }}] {{ t.text }}
+          <div class="transaction-main">
+            <strong>[{{ t.time }}]</strong> {{ t.text }}
+          </div>
+          <div v-if="t.code" class="transaction-code">
+            <span class="code-label">کۆدی بەرهەم:</span>
+            <span class="code-value">{{ t.code }}</span>
+            <button @click="copyCode(t.code)" class="copy-btn" title="کۆپیکردن">
+              📋
+            </button>
+          </div>
         </li>
         <li v-if="!transactions.length" class="list-group-item">هیچ مامەڵەیەک نەکراوە.</li>
       </ul>
@@ -252,6 +260,23 @@ function cancelPurchase() {
   showModal.value = false;
 }
 
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => {
+    success.value = 'کۆد کۆپی کرا!';
+    setTimeout(() => { success.value = ''; }, 2000);
+  }).catch(() => {
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = code;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    success.value = 'کۆد کۆپی کرا!';
+    setTimeout(() => { success.value = ''; }, 2000);
+  });
+}
+
 async function logout() {
   await signOut(auth);
   router.push('/login');
@@ -344,6 +369,53 @@ header {
 .alert {
   /* margin-top: 1rem; - Added via mt-3 class */
   text-align: center;
+}
+
+/* Transaction styles for displaying codes */
+.transaction-main {
+  margin-bottom: 0.5rem;
+}
+
+.transaction-code {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.code-label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.code-value {
+  background-color: #e9ecef;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #495057;
+  flex: 1;
+  word-break: break-all;
+}
+
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.copy-btn:hover {
+  background-color: #dee2e6;
 }
 
 /* Remove old input, button, .error, .success if fully replaced by Bootstrap/global classes */
