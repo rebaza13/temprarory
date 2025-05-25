@@ -1,7 +1,7 @@
 <template>
   <div class="shop-container">
     <header>
-      <span>بازاڕی بەرهەمەکان</span>
+      <span>NOBEL RAYAN SHOP</span>
       <button class="logout-btn btn" @click="logout">چوونەدەرەوە</button>
     </header>
     <div class="balance card-body">
